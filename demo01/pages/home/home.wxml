@@ -1,0 +1,128 @@
+<!--pages/home/home.wxml-->
+<wxs module="Filter">
+    var filterPrice = function(price) {
+        return price.toFixed(2)
+    }
+    module.exports.goodsPrice = filterPrice
+</wxs>
+<!-- 全局遮罩层 -->
+<view class='{{cartListState == true ? "shade" : ""}}' bindtap='toggleCart'></view>
+<view class='top'>
+    <image src='{{store_info.img}}' class='store-photo'></image>
+    <view class='store-title'>
+        <text class='store-name'>{{store_info.name}}</text>
+        <view class='store-notice'>
+            <image class='notice-icon' src='/images/notice.png'></image>
+            <text>{{store_info.notice}}</text>
+        </view>
+    </view>
+</view>
+<view class='content'>
+    <view class='content-tabbar'>
+        <view class='tabbar-item {{currentTab == 0 ? "tabbar-item-active" : ""}}' data-current="0" bindtap="switchTab">
+            <text>商品</text>
+        </view>
+        <view class='tabbar-item {{currentTab == 1 ? "tabbar-item-active" : ""}}' data-current="1" bindtap="switchTab">
+            <text>评价</text>
+        </view>
+        <view class='tabbar-item {{currentTab == 2 ? "tabbar-item-active" : ""}}' data-current="2" bindtap="switchTab">
+            <text>商家</text>
+        </view>
+    </view>
+    <swiper current='{{currentTab}}' duration='300' bindchange='switchShow' class='content-show' style='height:{{contentHight}}rpx'>
+        <swiper-item>
+            <view class='goods'>
+                <scroll-view class='goods-classify' scroll-y style='height:{{contentHight}}rpx'>
+                    <view class='goods-classify-item {{goodsClassifyID == index ? "classify-item-active" : ""}}' wx:for="{{goods_classify}}" wx:key="*this" bindtap='changeClassify' data-classifyid="{{item.id}}">
+                        <text>{{item.name}}</text>
+                    </view>
+                </scroll-view>
+                <scroll-view class='goods-list' scroll-y style='height:{{contentHight}}rpx'>
+                    <text class='goods-list-title'>{{goods_classify[goodsClassifyID].name}}</text>
+                    <!-- 商品分类id默认为0，显示所有商品 -->
+                    <view class='goods-list-item' wx:for='{{goods_list}}' wx:key="*this" wx:if="{{goodsClassifyID === 0}}">
+                        <view class='list-item-img'>
+                            <image src='{{item.goodsImg}}' mode='aspectFit'></image>
+                        </view>
+                        <view class='list-item-info'>
+                            <text class='item-info-name'>{{item.goodsName}}</text>
+                            <text class='item-info-price'>￥{{Filter.goodsPrice(item.goodsPrice)}}</text>
+                            <text class='item-info-sales'>销量： {{item.goodsSales}} 笔</text>
+                            <view class='item-info-keywords'>
+                                <text wx:for="{{item.goodsKeywords}}" wx:key="*this">{{item}}</text>
+                            </view>
+                        </view>
+                        <view class='list-item-num'>
+                            <block wx:for="{{cart_list}}" wx:for-item="goods" wx:key="*this" wx:if="{{goods.goodsID == item.goodsID}}">
+                                <image src='/images/reduce.png' bindtap='reduceGoods' data-goodsid='{{item.goodsID}}'></image>
+                                <text>{{goods.goodsNumber}}</text>
+                            </block>
+                            <image src='/images/add.png' bindtap='addGoods' data-goodsid='{{item.goodsID}}'></image>
+                        </view>
+                    </view>
+                    <!-- 当点击某一分类时，动态渲染对应分类下的商品 -->
+                    <view class='goods-list-item' wx:for='{{goods_list}}' wx:key="*this" wx:if="{{item.goodsClassify === goodsClassifyID}}">
+                        <view class='list-item-img'>
+                            <image src='{{item.goodsImg}}' mode='aspectFit'></image>
+                        </view>
+                        <view class='list-item-info'>
+                            <text class='item-info-name'>{{item.goodsName}}</text>
+                            <text class='item-info-price'>￥{{Filter.goodsPrice(item.goodsPrice)}}</text>
+                            <text class='item-info-sales'>销量： {{item.goodsSales}} 笔</text>
+                            <view class='item-info-keywords'>
+                                <text wx:for="{{item.goodsKeywords}}" wx:key="*this">{{item}}</text>
+                            </view>
+                        </view>
+                        <view class='list-item-num'>
+                            <block wx:for="{{cart_list}}" wx:for-item="goods" wx:key="*this" wx:if="{{goods.goodsID == item.goodsID}}">
+                                <image src='/images/reduce.png' bindtap='reduceGoods' data-goodsid='{{item.goodsID}}'></image>
+                                <text>{{goods.goodsNumber}}</text>
+                            </block>
+                            <image src='/images/add.png' bindtap='addGoods' data-goodsid='{{item.goodsID}}'></image>
+                        </view>
+                    </view>
+                </scroll-view>
+            </view>
+        </swiper-item>
+        <!-- 评论部分 -->
+        <swiper-item>
+            <view class='mark'>
+                <text>亲，商品还没有评论！</text>
+            </view>
+        </swiper-item>
+        <!-- 商家部分 -->
+        <swiper-item>
+            <view class='business' style='height:{{contentHight}}rpx'>
+                
+            </view>
+        </swiper-item>
+    </swiper>
+</view>
+<view class='cart' wx:if="{{currentTab == 0}}">
+    <scroll-view class='cart-list' scroll-y style='' hidden='{{cartListState == false}}'>
+        <!-- <view class='triangle'></view> -->
+        <view class='cart-list-top'>
+            <text>购物车{{"("+cart_list.length+")"}}</text>
+            <text bindtap='clearCart'>清空购物车</text>
+        </view>
+        <view class='cart-list-item' wx:for="{{cart_list}}" wx:key="*this">
+            <text>{{item.goodsName}}</text>
+            <text>￥{{Filter.goodsPrice(item.goodsPrice * item.goodsNumber)}}</text>
+            <view class='cart-list-item-num'>
+                <image src='/images/reduce.png' bindtap='reduceGoods' data-goodsid='{{item.goodsID}}'></image>
+                <text>{{item.goodsNumber}}</text>
+                <image src='/images/add.png' bindtap='addGoods' data-goodsid='{{item.goodsID}}'></image>
+            </view>
+        </view>
+    </scroll-view>
+    <view class='cart-bar'>
+        <view class='cart-bar-total' bindtap='toggleCart'>
+            <view class='cart-bar-total-icon'>
+                <image src='/images/cart.png'></image>
+                <text>{{cart_list.length}}</text>
+            </view>
+            <text>￥{{Filter.goodsPrice(goodsTotal)}}</text>
+        </view>
+        <text class='cart-bar-settlement' bingTap="">去结算</text>
+    </view>
+</view>
